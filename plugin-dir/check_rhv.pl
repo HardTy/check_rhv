@@ -5,9 +5,9 @@
 #                                                     #
 #  Name:    check_rhv                                 #
 #                                                     #
-#  Version: 2.0.0                                     #
+#  Version: 2.0.1                                     #
 #  Created: 2012-08-13                                #
-#  Last Update: 2018-04-09                            #
+#  Last Update: 2018-08-27                            #
 #  License: GPL - http://www.gnu.org/licenses         #
 #  Copyright: (c)2012,2013 ovido gmbh                 #
 #             (c)2014-2018 Rene Koch                  #
@@ -143,12 +143,12 @@ sub parse_options(){
   $rhevm_port    = $o_rhevm_port if defined $o_rhevm_port;
   $rhevm_api     = $o_rhevm_api  if defined $o_rhevm_api;
   $rhevm_timeout = $o_timeout    if defined $o_timeout;
-  
+
   # Get username and password via parameters or via file
   # format must be username@domain:password
   if (defined( $o_auth )){
     my @auth = split(/:/, $o_auth);
-    if (! $auth[0]){ 
+    if (! $auth[0]){
      print "RHV Username/Domain is missing.\n";
      print_help();
     }else{  $rhevm_user = $auth[0]; }
@@ -157,10 +157,10 @@ sub parse_options(){
       print_help();
     }else{  $rhevm_pwd = $auth[1];  }
     my @tmp_auth = split(/@/, $auth[0]);
-    if (! $tmp_auth[0]){ 
+    if (! $tmp_auth[0]){
       print "RHV Username is missing.\n";
       print_help(); }
-    if (! $tmp_auth[1]){ 
+    if (! $tmp_auth[1]){
       print "RHV Domain is missing.\n";
       print_help(); }
   }else{
@@ -207,7 +207,7 @@ sub parse_options(){
       exit $ERRORS{$status{'unknown'}};
     }
   }
-  
+
   # storage warnings and criticals can be % or M/G/T
   if (defined $o_rhev_storage){
     # convert warning into bytes
@@ -272,7 +272,7 @@ sub print_usage(){
   print "Usage: $0 [-v] -H <hostname> [-p <port>] -a <auth> | -f <authfile> [--ca-file <ca-file> [-o ] \n";
   print "       [-A <api>] [-t <timeout>] -D <data center> | -C <cluster> | -R <rhev host> [-n <nic>] \n";
   print "       | -S <storage domain> | -M <vm> | -P <vmpool> [-w <warn>] [-c <critical>] [-V] \n";
-  print "       [-l <check>] [-s <subcheck>]\n"; 
+  print "       [-l <check>] [-s <subcheck>]\n";
 }
 
 
@@ -408,11 +408,11 @@ sub check_dc{
         check_statistics("data_centers",$o_rhev_dc,"ovstorage")  if $o_subcheck eq "overall-usage";
         print_unknown("storage domain");
       }else{    check_istatus("data_centers",$o_rhev_dc,"storagedomains");  }
-    }else{  
+    }else{
       print "[V] Datacenter: Given datacenter check $o_check is not defined.\n" if $o_verbose >= 2;
       print_unknown("data center");
     }
-  }else{    
+  }else{
     print "[V] Datacenter: No check is specified, checking datacenter status.\n" if $o_verbose >= 2;
     check_cstatus("data_centers",$o_rhev_dc);
   }
@@ -484,7 +484,7 @@ sub check_host{
         check_statistics("hosts","$o_rhev_host","swap") if $o_subcheck eq "swap";
         print_unknown("memory");
       }else{
-        print "[V] Host: No subcheck is specified, checking memory usage.\n" if $o_verbose >= 2; 
+        print "[V] Host: No subcheck is specified, checking memory usage.\n" if $o_verbose >= 2;
         check_statistics("hosts","$o_rhev_host","memory");
       }
     }
@@ -495,12 +495,12 @@ sub check_host{
         check_statistics("hosts","$o_rhev_host","errors") if $o_subcheck eq "errors";
         print_unknown("network");
       }else{    check_istatus("hosts",$o_rhev_host,"network");  }
-    }else{ 
+    }else{
       print "[V] Host: Given host check $o_check is not defined.\n" if $o_verbose >= 2;
       print_unknown("host");
     }
   }else{
-    print "[V] Host: No check is specified, checking host status.\n" if $o_verbose >= 2; 
+    print "[V] Host: No check is specified, checking host status.\n" if $o_verbose >= 2;
     check_cstatus("hosts","$o_rhev_host");
   }
 }
@@ -521,8 +521,8 @@ sub check_storage{
     check_cstatus("storage_domains","$o_rhev_storage") if $o_check eq "status";
     check_statistics("storage_domains",$o_rhev_storage,"storage") if $o_check eq "usage";
     print_unknown("storagedomains");
-  }else{    
-    print "[V] Storage: No check is specified, checking storage status.\n" if $o_verbose >= 2; 
+  }else{
+    print "[V] Storage: No check is specified, checking storage status.\n" if $o_verbose >= 2;
     check_cstatus("storage_domains","$o_rhev_storage");
   }
 }
@@ -556,8 +556,8 @@ sub check_vm{
       print "[V] VM: Given vm check $o_check is not defined.\n" if $o_verbose >= 2;
       print_unknown("vm");
     }
-  }else{ 
-    print "[V] VM: No check is specified, checking vm status.\n" if $o_verbose >= 2; 
+  }else{
+    print "[V] VM: No check is specified, checking vm status.\n" if $o_verbose >= 2;
     check_cstatus("vms","$o_rhev_vm");
   }
 }
@@ -577,8 +577,8 @@ sub check_vmpool{
   if (defined $o_check){
     &check_vmpool_usage if $o_check eq "usage";
     print_unknown("vmpool");
-  }else{    
-    print "[V] VM Pool: No check is specified, checking vmpool usage.\n" if $o_verbose >= 2; 
+  }else{
+    print "[V] VM Pool: No check is specified, checking vmpool usage.\n" if $o_verbose >= 2;
     &check_vmpool_usage;
   }
 }
@@ -599,7 +599,7 @@ sub check_vmpool_usage{
   print "[D] check_vmpool_usage: Called function check_vmpool_usage.\n" if $o_verbose == 3;
   # get vmpool id
   my $iref = get_result("/vmpools?search=name%3D$o_rhev_vmpool","vmpools","id");
-  # get vm status with vmpool id  
+  # get vm status with vmpool id
   my %id = %{ $iref };
   print "[D] check_vmpool_usage: \%id: " if $o_verbose == 3; print Dumper(%id) if $o_verbose == 3;
   my $size = 0;
@@ -623,11 +623,11 @@ sub check_vmpool_usage{
   print "[V] Usage: warning value: $o_warn.\n" if $o_verbose >= 2;
   print "[V] Usage: critical value: $o_crit.\n" if $o_verbose >= 2;
   my $perf = undef;
-  if ($perfdata == 1){ 
+  if ($perfdata == 1){
     $perf = "|vmpool=$ok;$o_warn;$o_crit;0;";
     print "[V] Status: Performance data: $perf.\n" if $o_verbose >= 2;
-  }else{ 
-    $perf = ""; 
+  }else{
+    $perf = "";
   }
   if ( ( $ok < $size ) && ( $ok < $o_warn ) && ( $ok < $o_crit ) ){
     exit_plugin('ok',"VM Pool",$size-$ok . "/$size vms free" . $perf);
@@ -635,7 +635,7 @@ sub check_vmpool_usage{
     exit_plugin('warning',"VM Pool",$size-$ok . "/$size vms free" . $perf);
   }else{
     exit_plugin('critical',"VM Pool",$size-$ok . "/$size vms free" . $perf);
-  } 
+  }
   print_notfound("VM Pool", $o_rhev_vmpool);
 }
 
@@ -702,7 +702,7 @@ sub check_status {
   }
   my %result = %{$rref};
   print "[D] check_status: \%result: " if $o_verbose == 3; print Dumper(%result) if $o_verbose == 3;
-  
+
   # loop through multiple results
   print "[D] check_status: Looping through \%result\n" if $o_verbose == 3;
   foreach my $key (keys %result){
@@ -717,10 +717,10 @@ sub check_status {
           my $sub = "cluster";
              $sub = "vmpool" if $searchid eq "vmpool";
           print "[D] check_status: Variable \$sub: $sub.\n" if $o_verbose == 3;
-          if ($components eq "networks") { 
+          if ($components eq "networks") {
             print "[V] Status: Value of $value: $result{$key}{$value}{status}.\n" if $o_verbose >= 2;
             $return{$value} = $result{$key}{$value}{status};
-	    next; 
+	    next;
           }
           next unless defined $result{$key}{$value}{$sub}{id};
           print "[V] Status: $sub-Value of $value: $result{$key}{$value}{status}.\n" if $o_verbose >= 2;
@@ -739,7 +739,7 @@ sub check_status {
       print "[D] check_status: Converting variable \$components.\n" if $o_verbose == 3;
       chop $components;
       print "[D] check_status: Converted variable \$components: $components\n" if $o_verbose == 3;
-      if (! defined $result{$component}{status}){ 
+      if ( (! defined $result{$component}{status}) && (! defined $result{$component}{id}) ){ 
         print_notfound(ucfirst($components), $search);
       }
       print "[V] Status: Result: $result{$component}{status}\n" if $o_verbose >= 2;
@@ -841,13 +841,13 @@ sub check_istatus{
   print "[D] check_istatus: Variable \$state: $state.\n" if $o_verbose == 3;
   print "[V] Eval Status: warning value: $o_warn.\n" if $o_verbose >= 2;
   print "[V] Eval Status: critical value: $o_crit.\n" if $o_verbose >= 2;
-  
+
   my $perf = undef;
-  if ($perfdata == 1){ 
+  if ($perfdata == 1){
     $perf = "|$subcheck=$ok;$o_warn;$o_crit;0;";
     print "[V] Eval Status: Performance data: $perf.\n" if $o_verbose >= 2;
-  }else{ 
-    $perf = ""; 
+  }else{
+    $perf = "";
   }
   if ( ( ($ok == $size) && ($size != 0) ) || ( ($ok > $o_warn) && ($ok > $o_crit) ) ){
     exit_plugin('ok',ucfirst($subcheck),"$ok/$size " . ucfirst($subcheck) . " with state $state" . $perf);
@@ -888,13 +888,13 @@ sub check_statistics{
   my $iref = get_result("/$url?search=name%3D$search",$component,"id");
   my %id   = %{ $iref };
   print "[D] check_statistics: \%id: " if $o_verbose == 3; print Dumper(%id) if $o_verbose == 3;
-  
+
   my $status = "unknown";
   my $output = undef;
   my $cpu_cores = 1;
 
   my %rethash;
-  my $subcheck = "statistics"; 
+  my $subcheck = "statistics";
      $subcheck = "nics" if $statistics eq "traffic";
      $subcheck = "nics" if $statistics eq "errors";
      $subcheck = ""     if $statistics eq "storage";
@@ -949,7 +949,7 @@ sub check_statistics{
         print "[D] check_statistics: \%cputop: " if $o_verbose == 3; print Dumper(%cputop) if $o_verbose == 3;
         $cpu_cores = $cputop{ 'sockets' } * $cputop{ 'cores' };
       }
-    	
+
       # check cpu, load and memory
       my $iret = get_stats($component,$id{ $key },$subcheck,$statistics,$key);
       my %temp = %{ $iret };
@@ -1075,7 +1075,7 @@ sub check_statistics{
         print "[V] Statistics: Status: $status.\n" if $o_verbose >= 2;
       }else{
         my $warn_key = "usage";
-        my $crit_key = "usage"; 
+        my $crit_key = "usage";
         # are warning and critical values in bytes or %?
         $warn_key = "usageBytes" if $o_warn > 100;
         $crit_key = "usageBytes" if $o_crit > 100;
@@ -1115,7 +1115,7 @@ sub check_statistics{
   }else{
     exit_plugin($status,$statistics,$output.$perf);
   }
-  
+
 }
 
 
@@ -1230,7 +1230,7 @@ sub get_stats {
         print "[V] Statistics: Getting Network Traffic Usage.\n" if $o_verbose >= 2;
         $network = "data.current";
       }else{
-        print "[V] Statistics: Getting Network Errors.\n" if $o_verbose >= 2; 
+        print "[V] Statistics: Getting Network Errors.\n" if $o_verbose >= 2;
         $network = "errors.total";
       }
       # Network traffic - reported in Bytes/second
@@ -1248,7 +1248,7 @@ sub get_stats {
       print "[V] Statistics: Getting Storage Usage.\n" if $o_verbose >= 2;
       my %storage_domain;
       # storage attached to datacenter has different path to direct checked storagedomains
-      if (! $result{id}){ 
+      if (! $result{id}){
         if (! $result{$value}{id}){
           # loop through storage domains
           foreach my $storage (keys %{ $result{ $value } }){
@@ -1346,10 +1346,10 @@ sub get_result{
   my %return;
 
   print "[D] get_result: Looping through \%result.\n" if $o_verbose == 3;
-  
+
   # return CPU topology for dynamic load threshold calculation
   return $result{$xml}{$search} if $search eq "topology";
-  
+
   foreach my $key (keys %result){
   chop $xml;
     if (! $result{$xml}{$search} ){
@@ -1426,7 +1426,7 @@ sub check_nic_errors{
   print "[D] check_nic_errors: Input parameter \$host: $host\n" if $o_verbose == 3;
   print "[D] check_nic_errors: Input parameter \$nic: $nic\n" if $o_verbose == 3;
   print "[D] check_nic_errors: Input parameter \$error: $error\n" if $o_verbose == 3;
-  
+
   my $return;
   # check if errors file exist
   if (! -d $cookie . "/" . $host){
@@ -1455,9 +1455,9 @@ sub check_nic_errors{
     $return = $error;
     write_errors_file($cookie . "/" . $host . "/" . $nic, $return);
   }
-  
+
   return $return;
-  
+
 }
 
 #***************************************************#
@@ -1598,17 +1598,17 @@ sub eval_status{
   print "[V] Eval Status: warning value: $o_warn.\n" if $o_verbose >= 2;
   print "[V] Eval Status: critical value: $o_crit.\n" if $o_verbose >= 2;
   my $perf = undef;
-  if ($perfdata == 1){ 
+  if ($perfdata == 1){
     $perf = "|" . $component . "_up=$comp_state{ 'up' }{ 'value' };$o_warn;$o_crit;0; ";
     foreach my $comp_status (keys %comp_state){
       next if $comp_status eq "up";
       $perf .= "$comp_status=$comp_state{ $comp_status }{ 'value' };;;0; ";
     }
     print "[V] Eval Status: Performance data: $perf.\n" if $o_verbose >= 2;
-  }else{ 
-    $perf = ""; 
+  }else{
+    $perf = "";
   }
-  
+
   # give more verbose information about the states
   my $info = "";
   if ($o_verbose >= 1){
@@ -1667,7 +1667,7 @@ sub rhev_connect{
   my $ra = LWP::UserAgent->new();
      $ra->timeout($rhevm_timeout);
      $ra->env_proxy;				# read proxy information from env variables
-     
+
   # handle no_proxy settings for old LWP::UserAgent versions
   if ((LWP::UserAgent->VERSION < 6.0) && (defined $ENV{no_proxy})){
     if ($ENV{no_proxy} =~ $o_rhevm_host){
@@ -1718,7 +1718,7 @@ sub rhev_connect{
     $rr->authorization_basic($rhevm_user,$rhevm_pwd);
     $re = rest_api_connect($rr, $ra, $cookie . "/" . $cf);
   }
-  my $result; 
+  my $result;
   if (defined( $o_ignore_xml_warn )){
     $result = eval { local $SIG{__WARN__} = sub {}; XMLin($re->content) };
   } else {
@@ -1745,21 +1745,21 @@ sub rest_api_connect{
   print "[D] rest_api_connect: Input parameter: $_[0].\n" if $o_verbose == 3;
   print "[D] rest_api_connect: Input parameter: $_[1].\n" if $o_verbose == 3;
   print "[D] rest_api_connect: Input parameter: $_[2].\n" if $o_verbose == 3;
-  
+
   my $rr = $_[0];
   my $ra = $_[1];
   my $cookie = $_[2];
-  
+
   my $re = $ra->request($rr);
   print "[V] REST-API: " . $re->headers_as_string if $o_verbose >= 2;
   print "[D] rest_api_connect: " . $re->content if $o_verbose >= 3;
-  if (! $re->is_success){   
-    print "RHV $status{'unknown'}: Failed to connect to RHVM-API or received invalid response.\n"; 
+  if (! $re->is_success){
+    print "RHV $status{'unknown'}: Failed to connect to RHVM-API or received invalid response.\n";
     if (-f $cookie){
       print "[D] rhev_connect: Deleting file $cookie\n" if $o_verbose == 3;
       unlink $cookie;
     }
-    exit $ERRORS{'UNKNOWN'};    
+    exit $ERRORS{'UNKNOWN'};
   }
 
   # write cookie into file
@@ -1778,10 +1778,9 @@ sub rest_api_connect{
       chmod (0600, $cookie);
     }
   }
-  
+
   return $re;
-  
+
 }
 
 exit $ERRORS{$status{'unknown'}};
-
